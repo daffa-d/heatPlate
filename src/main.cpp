@@ -12,7 +12,7 @@ int setPoint = 0;
 int set = 150;
 float kP = 2, kI = 0.0025, kD = 9;
 float PID_OUTPUT;
-float PID_OUTPUT_MAX = 180;
+float PID_OUTPUT_MAX = 220;
 float PID_OUTPUT_MIN = 0;
 float pwmVal = 255;
 int mode = 0;
@@ -92,7 +92,7 @@ void loop()
     setPoint = detik * 1.556; // 140
     if (temp > 140 && detik < 2500)
     {
-      lcdPrint(2, 1, "Preheat Selesai");
+      lcdPrint(1, 1, "Preheat Selesai");
       delay(2000);
       lcd.clear();
       mode = 2;
@@ -107,27 +107,30 @@ void loop()
     setPoint = set;
     if (temp > setPoint - 2 && temp < setPoint + 2)
     {
-        lcdPrint(2, 1, "SetPoint !!!");
-        delay(2000);
+        lcdPrint(0, 1, "  SetPoint !!!  ");
+        delay(1000);
         detik = 0;
-        lcd.clear();
+        // lcd.clear();
         mode = 3;  
     }
     else
     {
       state = true;
     }
-  } else if (mode == 3 ){
+  } 
+  else if (mode == 3 ){
     state = true;
     lcdPrint(0, 0, "T: " + String(temp) + "C");
-    lcdPrint(2,1, "Peak SetPoint");
-    if(detik > 10 && detik < 1500) {
+    if(detik > 10 && detik < 500) {
       setPoint = set; 
-    } else if(detik > 1500){
+      if(temp > setPoint){
+        setPoint = 0;
+      }
+    } else if(detik > 600){
         state = false;
-        lcdPrint(2,1, "Cooling");
+        lcdPrint(0, 1, "Cooling");
         if(temp < 50){
-          lcdPrint(1,1, "Cooling Selesai");
+          lcdPrint(0,1, "Cooling Selesai");
           delay(2000);
           lcd.clear();
           detik = 0;
@@ -153,6 +156,7 @@ void pidController()
   float PID_RefreshRate = 50;
   unsigned long prevTime_PID = 0;
   if(millis() - prevTime_PID >= PID_RefreshRate){
+  
   PID_ERROR = setPoint - temp;
   PID_P = kP * PID_ERROR;
   PID_I = PID_I + (kI * PID_ERROR);
@@ -167,10 +171,12 @@ void pidController()
   {
     PID_OUTPUT = PID_OUTPUT_MIN;
   }
-  pwmVal = 255 - PID_OUTPUT;
-  // Serial.println(pwmVal);
+  pwmVal = PID_OUTPUT;
+  Serial.println(pwmVal);
+  
   analogWrite(10, pwmVal);
   analogWrite(9, pwmVal);
+  
   PREV_ERROR = PID_ERROR;
   }
 }
@@ -199,5 +205,5 @@ void time()
     prevTime = millis();
     detik++;
   }
-  Serial.println(detik);
+  // Serial.println(detik);
 }
