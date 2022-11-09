@@ -121,12 +121,18 @@ void loop()
     state = true;
     lcdPrint(0, 0, "T: " + String(temp) + "C");
     lcdPrint(2,1, "Peak SetPoint");
-    if(detik > 10 && detik < 2000) {
-      setPoint = set;
-      
-    } else if(detik > 2000){
+    if(detik > 10 && detik < 1500) {
+      setPoint = set; 
+    } else if(detik > 1500){
         state = false;
         lcdPrint(2,1, "Cooling");
+        if(temp < 50){
+          lcdPrint(1,1, "Cooling Selesai");
+          delay(2000);
+          lcd.clear();
+          detik = 0;
+          mode = 0;
+        }
     } 
     
   }
